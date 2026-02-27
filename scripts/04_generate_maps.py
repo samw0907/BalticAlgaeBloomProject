@@ -7,6 +7,7 @@ import rasterio
 import geopandas as gpd
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
+import matplotlib.patches as mpatches
 from pyproj import Transformer
 from pathlib import Path
 
@@ -71,22 +72,22 @@ def add_graticule(ax):
     """Add lat/lon grid lines and labels to a UTM-projected axis."""
 
     # Grid lines at 0.5 degree intervals
-    lons = [23.5, 24.0, 24.5, 25.0, 25.5]
-    lats = [59.5, 60.0, 60.5]
+    lons = [23.5, 24.0, 24.5, 25.0]
+    lats = [59.5, 60.0]
 
     # Vertical lines (longitude)
     for lon in lons:
         x, _ = transformer.transform(lon, 60.0)
         ax.axvline(x, color="black", linewidth=0.6, linestyle="-", alpha=0.7)
-        ax.text(x, 6621000, f"{lon}°", color="white", fontsize=6,
-                ha="center", va="bottom")
+        ax.text(x, 6588500, f"{lon}°", color="white", fontsize=6,
+            ha="center", va="top", clip_on=False)
 
     # Horizontal lines (latitude)
     for lat in lats:
         _, y = transformer.transform(24.0, lat)
         ax.axhline(y, color="black", linewidth=0.6, linestyle="-", alpha=0.7)
-        ax.text(301000, y, f"{lat}°", color="white", fontsize=6,
-                ha="left", va="center")
+        ax.text(298000, y, f"{lat}°", color="white", fontsize=6,
+            ha="right", va="center", clip_on=False)
 
     # Remove default UTM tick labels
     ax.set_xticks([])
@@ -94,7 +95,7 @@ def add_graticule(ax):
 
 # --- Build three-panel figure ---
 
-fig, axes = plt.subplots(1, 3, figsize=(18, 8))
+fig, axes = plt.subplots(1, 3, figsize=(20, 8))
 fig.patch.set_facecolor("black")
 
 # Colour map and normalisation - consistent across all three panels
@@ -104,9 +105,8 @@ norm = mcolors.Normalize(vmin=NDCI_MIN, vmax=NDCI_MAX)
 
 # MPA style categories
 mpa_styles = {
-    "Designated":                 {"edgecolor": "white",  "linewidth": 0.8},
+    "Designated":                 {"edgecolor": "black",  "linewidth": 0.8},
     "Designated and managed":     {"edgecolor": "red",    "linewidth": 0.8},
-    "Designated and partly managed": {"edgecolor": "orange", "linewidth": 0.8},
 }
 
 for ax, (name, date_label) in zip(axes, SCENES.items()):
@@ -142,7 +142,7 @@ for ax, (name, date_label) in zip(axes, SCENES.items()):
     ax.text(
         0.02, 0.97, date_label,
         transform=ax.transAxes,
-        color="white", fontsize=11, fontweight="bold",
+        color="black", fontsize=11, fontweight="bold",
         va="top", ha="left"
     )
 
@@ -151,10 +151,45 @@ for ax, (name, date_label) in zip(axes, SCENES.items()):
     for spine in ax.spines.values():
         spine.set_edgecolor("white")
 
+# --- Scale bar and north arrow on all three panels ---
+for ax in axes:
+    scale_x_end = 408000
+    scale_x_start = 388000  # 20km
+    scale_y = 6593000
+    ax.plot([scale_x_start, scale_x_end], [scale_y, scale_y],
+            color="black", linewidth=2)
+    ax.text((scale_x_start + scale_x_end) / 2, scale_y + 1000,
+            "20 km", color="black", fontsize=7, ha="center")
+    ax.annotate(
+        "", xy=(405000, 6604000), xytext=(405000, 6597000),
+        arrowprops=dict(arrowstyle="->", color="black", lw=1.5)
+    )
+    ax.text(405000, 6605500, "N", color="black", fontsize=8,
+            ha="center", va="bottom", fontweight="bold")
+
+# --- MPA legend ---
+legend_elements = [
+    mpatches.Patch(facecolor="none", edgecolor="black", label="Designated"),
+    mpatches.Patch(facecolor="none", edgecolor="red",   label="Designated and managed"),
+]
+legend = fig.legend(
+    handles=legend_elements,
+    loc="lower right",
+    bbox_to_anchor=(0.91, 0.02),
+    fontsize=7,
+    framealpha=0.2,
+    labelcolor="white",
+    title="HELCOM MPAs",
+    title_fontsize=8,
+)
+legend.get_title().set_color("white")
+
 # Shared colour bar
 cbar_ax = fig.add_axes([0.92, 0.15, 0.015, 0.7])
 sm = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
 cbar = fig.colorbar(sm, cax=cbar_ax)
+cbar.set_ticks([NDCI_MIN, 0, 0.02, 0.04, 0.06, NDCI_MAX])
+cbar.set_ticklabels([str(NDCI_MIN), "0", "0.02", "0.04", "0.06", str(NDCI_MAX)])
 cbar.set_label("NDCI", color="white", fontsize=9)
 cbar.ax.yaxis.set_tick_params(color="white")
 cbar.ax.tick_params(labelcolor="white", labelsize=7)
