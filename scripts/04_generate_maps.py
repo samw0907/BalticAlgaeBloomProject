@@ -77,14 +77,14 @@ def add_graticule(ax):
     # Vertical lines (longitude)
     for lon in lons:
         x, _ = transformer.transform(lon, 60.0)
-        ax.axvline(x, color="white", linewidth=0.4, linestyle="--", alpha=0.5)
+        ax.axvline(x, color="black", linewidth=0.6, linestyle="-", alpha=0.7)
         ax.text(x, 6621000, f"{lon}°", color="white", fontsize=6,
                 ha="center", va="bottom")
 
     # Horizontal lines (latitude)
     for lat in lats:
         _, y = transformer.transform(24.0, lat)
-        ax.axhline(y, color="white", linewidth=0.4, linestyle="--", alpha=0.5)
+        ax.axhline(y, color="black", linewidth=0.6, linestyle="-", alpha=0.7)
         ax.text(301000, y, f"{lat}°", color="white", fontsize=6,
                 ha="left", va="center")
 
@@ -135,7 +135,7 @@ for ax, (name, date_label) in zip(axes, SCENES.items()):
 
     # Lock view to raster tile extent
     ax.set_xlim(300000, 410000)
-    ax.set_ylim(6620000, 6700020)
+    ax.set_ylim(6590220, 6665000)
     add_graticule(ax)
 
     # Date label

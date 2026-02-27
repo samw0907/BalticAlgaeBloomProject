@@ -82,7 +82,7 @@ def process_scene(name, scene):
 
     # Retain only water-valid pixels: class 5 (bare soil/coastal), 6 (water), 7 (unclassified)
     # Everything else (clouds, cloud shadow, saturated pixels etc.) becomes NaN
-    valid_mask = (scl == 5) | (scl == 6) | (scl == 7)
+    valid_mask = (scl == 6) | (scl == 7)
 
     # --- Calculate NDCI ---
 
