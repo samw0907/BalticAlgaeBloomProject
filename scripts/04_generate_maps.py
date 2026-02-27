@@ -8,6 +8,7 @@ import geopandas as gpd
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import matplotlib.patches as mpatches
+from matplotlib.patches import Polygon, Rectangle
 from pyproj import Transformer
 from pathlib import Path
 
@@ -136,6 +137,7 @@ for ax, (name, date_label) in zip(axes, SCENES.items()):
     # Lock view to raster tile extent
     ax.set_xlim(300000, 410000)
     ax.set_ylim(6590220, 6665000)
+
     add_graticule(ax)
 
     # Date label
@@ -151,21 +153,61 @@ for ax, (name, date_label) in zip(axes, SCENES.items()):
     for spine in ax.spines.values():
         spine.set_edgecolor("white")
 
-# --- Scale bar and north arrow on all three panels ---
-for ax in axes:
-    scale_x_end = 408000
-    scale_x_start = 388000  # 20km
-    scale_y = 6593000
-    ax.plot([scale_x_start, scale_x_end], [scale_y, scale_y],
-            color="black", linewidth=2)
-    ax.text((scale_x_start + scale_x_end) / 2, scale_y + 1000,
-            "20 km", color="black", fontsize=7, ha="center")
-    ax.annotate(
-        "", xy=(405000, 6604000), xytext=(405000, 6597000),
-        arrowprops=dict(arrowstyle="->", color="black", lw=1.5)
-    )
-    ax.text(405000, 6605500, "N", color="black", fontsize=8,
-            ha="center", va="bottom", fontweight="bold")
+    # Panel border
+    for spine in ax.spines.values():
+        spine.set_edgecolor("white")
+
+    # --- North arrow - cartographic split style, top right ---
+    arrow_x = 403000
+    arrow_top = 6663000
+    arrow_bottom = 6655000
+    arrow_mid = (arrow_top + arrow_bottom) / 2
+    arrow_width = 2500
+
+    # Left half - black
+    left = Polygon([
+        [arrow_x, arrow_top],
+        [arrow_x - arrow_width, arrow_bottom],
+        [arrow_x, arrow_mid]
+    ], closed=True, facecolor="black", edgecolor="black", linewidth=0.5)
+    ax.add_patch(left)
+
+    # Right half - white
+    right = Polygon([
+        [arrow_x, arrow_top],
+        [arrow_x + arrow_width, arrow_bottom],
+        [arrow_x, arrow_mid]
+    ], closed=True, facecolor="white", edgecolor="black", linewidth=0.5)
+    ax.add_patch(right)
+
+    # --- Scale bar - alternating black/white segments, bottom right ---
+    scale_x_start = 388000
+    segment_width = 5000  # 5km per segment
+    scale_y = 6592000
+    scale_height = 1000
+    colours = ["black", "white", "black"]
+    for i, col in enumerate(colours):
+        rect = Rectangle(
+            (scale_x_start + i * segment_width, scale_y),
+            segment_width, scale_height,
+            facecolor=col, edgecolor="black", linewidth=0.5
+        )
+        ax.add_patch(rect)
+
+    # Labels above the bar
+    ax.text(scale_x_start, scale_y + scale_height + 500, "0", color="black", fontsize=6, ha="center")
+    ax.text(scale_x_start + segment_width, scale_y + scale_height + 500, "5", color="black", fontsize=6, ha="center")
+    ax.text(scale_x_start + segment_width * 3, scale_y + scale_height + 500, "15 km", color="black", fontsize=6, ha="center")
+
+# --- Shared colour bar ---
+cbar_ax = fig.add_axes([0.92, 0.25, 0.012, 0.5])
+sm = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
+cbar = fig.colorbar(sm, cax=cbar_ax)
+cbar.set_ticks([NDCI_MIN, 0, 0.02, 0.04, 0.06, NDCI_MAX])
+cbar.set_ticklabels([str(NDCI_MIN), "0", "0.02", "0.04", "0.06", str(NDCI_MAX)])
+cbar.set_label("NDCI", color="white", fontsize=9)
+cbar.ax.yaxis.set_tick_params(color="white")
+cbar.ax.tick_params(labelcolor="white", labelsize=7)
 
 # --- MPA legend ---
 legend_elements = [
@@ -183,16 +225,6 @@ legend = fig.legend(
     title_fontsize=8,
 )
 legend.get_title().set_color("white")
-
-# Shared colour bar
-cbar_ax = fig.add_axes([0.92, 0.15, 0.015, 0.7])
-sm = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
-cbar = fig.colorbar(sm, cax=cbar_ax)
-cbar.set_ticks([NDCI_MIN, 0, 0.02, 0.04, 0.06, NDCI_MAX])
-cbar.set_ticklabels([str(NDCI_MIN), "0", "0.02", "0.04", "0.06", str(NDCI_MAX)])
-cbar.set_label("NDCI", color="white", fontsize=9)
-cbar.ax.yaxis.set_tick_params(color="white")
-cbar.ax.tick_params(labelcolor="white", labelsize=7)
 
 # Title
 fig.suptitle(
