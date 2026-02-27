@@ -1,0 +1,6 @@
+# Processed raster outputs - regenerate by running scripts
+outputs/maps/*.tif
+outputs/maps/*.png
+outputs/maps/*.pdf
+outputs/statistics/*.csv
+*.tif
