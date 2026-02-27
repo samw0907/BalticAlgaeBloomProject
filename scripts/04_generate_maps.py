@@ -48,3 +48,15 @@ for name in SCENES:
 print("Loaded scenes:")
 for name, arr in ndci_data.items():
     print(f"  {name}: shape {arr.shape}, mean NDCI {np.nanmean(arr):.4f}")
+
+# --- Load HELCOM MPA boundaries ---
+
+mpa_path = VECTORS_DIR / "HELCOM_MPAs_2019_2.shp"
+mpas = gpd.read_file(mpa_path)
+
+# Reproject from EPSG:4326 to EPSG:32635 to match raster data
+mpas = mpas.to_crs("EPSG:32635")
+
+print(f"\nLoaded {len(mpas)} MPA polygons")
+print(f"CRS: {mpas.crs}")
+print(f"Columns: {list(mpas.columns)}")
