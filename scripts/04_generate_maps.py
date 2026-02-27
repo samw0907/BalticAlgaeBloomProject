@@ -60,3 +60,85 @@ mpas = mpas.to_crs("EPSG:32635")
 print(f"\nLoaded {len(mpas)} MPA polygons")
 print(f"CRS: {mpas.crs}")
 print(f"Columns: {list(mpas.columns)}")
+
+# --- Build three-panel figure ---
+
+fig, axes = plt.subplots(1, 3, figsize=(18, 8))
+fig.patch.set_facecolor("black")
+
+# Colour map and normalisation - consistent across all three panels
+cmap = plt.cm.Spectral_r
+norm = mcolors.Normalize(vmin=NDCI_MIN, vmax=NDCI_MAX)
+
+# MPA style categories
+mpa_styles = {
+    "Designated":                 {"edgecolor": "white",  "linewidth": 0.8},
+    "Designated and managed":     {"edgecolor": "red",    "linewidth": 0.8},
+    "Designated and partly managed": {"edgecolor": "orange", "linewidth": 0.8},
+}
+
+for ax, (name, date_label) in zip(axes, SCENES.items()):
+    ax.set_facecolor("black")
+
+    # Display NDCI raster
+    img = ax.imshow(
+        ndci_data[name],
+        cmap=cmap,
+        norm=norm,
+        extent=ndci_extent[name],
+        origin="upper",
+        interpolation="none"
+    )
+
+    # Overlay MPA boundaries by category
+    for status, style in mpa_styles.items():
+        subset = mpas[mpas["MPA_status"] == status]
+        if not subset.empty:
+            subset.plot(
+                ax=ax,
+                facecolor="none",
+                edgecolor=style["edgecolor"],
+                linewidth=style["linewidth"]
+            )
+
+    # Date label
+    ax.text(
+        0.02, 0.97, date_label,
+        transform=ax.transAxes,
+        color="white", fontsize=11, fontweight="bold",
+        va="top", ha="left"
+    )
+
+    # Axis styling
+    ax.tick_params(colors="white", labelsize=7)
+    for spine in ax.spines.values():
+        spine.set_edgecolor("white")
+
+# Shared colour bar
+cbar_ax = fig.add_axes([0.92, 0.15, 0.015, 0.7])
+sm = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
+cbar = fig.colorbar(sm, cax=cbar_ax)
+cbar.set_label("NDCI", color="white", fontsize=9)
+cbar.ax.yaxis.set_tick_params(color="white")
+cbar.ax.tick_params(labelcolor="white", labelsize=7)
+
+# Title
+fig.suptitle(
+    "Algae Bloom Monitoring, Baltic Sea  |  NDCI Index Analysis  |  June - August 2024",
+    color="white", fontsize=12, fontweight="bold", y=0.98
+)
+
+plt.subplots_adjust(left=0.04, right=0.91, top=0.93, bottom=0.07, wspace=0.08)
+
+# --- Save outputs ---
+
+png_path = MAPS_DIR / "ndci_map.png"
+pdf_path = MAPS_DIR / "ndci_map.pdf"
+
+fig.savefig(png_path, dpi=300, bbox_inches="tight", facecolor="black")
+fig.savefig(pdf_path, dpi=300, bbox_inches="tight", facecolor="black")
+
+print(f"\nSaved: {png_path}")
+print(f"Saved: {pdf_path}")
+
+plt.show()
