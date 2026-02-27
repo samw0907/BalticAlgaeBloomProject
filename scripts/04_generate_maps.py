@@ -7,6 +7,7 @@ import rasterio
 import geopandas as gpd
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
+from pyproj import Transformer
 from pathlib import Path
 
 # --- Path configuration ---
@@ -61,13 +62,44 @@ print(f"\nLoaded {len(mpas)} MPA polygons")
 print(f"CRS: {mpas.crs}")
 print(f"Columns: {list(mpas.columns)}")
 
+# --- Graticule helper ---
+
+# Transformer from geographic (lat/lon) to UTM Zone 35N
+transformer = Transformer.from_crs("EPSG:4326", "EPSG:32635", always_xy=True)
+
+def add_graticule(ax):
+    """Add lat/lon grid lines and labels to a UTM-projected axis."""
+
+    # Grid lines at 0.5 degree intervals
+    lons = [23.5, 24.0, 24.5, 25.0, 25.5]
+    lats = [59.5, 60.0, 60.5]
+
+    # Vertical lines (longitude)
+    for lon in lons:
+        x, _ = transformer.transform(lon, 60.0)
+        ax.axvline(x, color="white", linewidth=0.4, linestyle="--", alpha=0.5)
+        ax.text(x, 6621000, f"{lon}°", color="white", fontsize=6,
+                ha="center", va="bottom")
+
+    # Horizontal lines (latitude)
+    for lat in lats:
+        _, y = transformer.transform(24.0, lat)
+        ax.axhline(y, color="white", linewidth=0.4, linestyle="--", alpha=0.5)
+        ax.text(301000, y, f"{lat}°", color="white", fontsize=6,
+                ha="left", va="center")
+
+    # Remove default UTM tick labels
+    ax.set_xticks([])
+    ax.set_yticks([])
+
 # --- Build three-panel figure ---
 
 fig, axes = plt.subplots(1, 3, figsize=(18, 8))
 fig.patch.set_facecolor("black")
 
 # Colour map and normalisation - consistent across all three panels
-cmap = plt.cm.Spectral_r
+cmap = plt.cm.Spectral_r.copy()
+cmap.set_bad("white")
 norm = mcolors.Normalize(vmin=NDCI_MIN, vmax=NDCI_MAX)
 
 # MPA style categories
@@ -100,6 +132,11 @@ for ax, (name, date_label) in zip(axes, SCENES.items()):
                 edgecolor=style["edgecolor"],
                 linewidth=style["linewidth"]
             )
+
+    # Lock view to raster tile extent
+    ax.set_xlim(300000, 410000)
+    ax.set_ylim(6620000, 6700020)
+    add_graticule(ax)
 
     # Date label
     ax.text(
