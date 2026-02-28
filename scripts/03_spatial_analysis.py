@@ -37,6 +37,30 @@ mpas = mpas.to_crs("EPSG:32635")
 
 print(f"Loaded {len(mpas)} MPA polygons")
 
+# --- Filter MPAs by coverage within tile extent ---
+
+# Get tile extent from June raster as a polygon
+with rasterio.open(OUTPUT_DIR / "june_ndci.tif") as src:
+    tile_bounds = src.bounds
+    from shapely.geometry import box
+    tile_polygon = box(tile_bounds.left, tile_bounds.bottom,
+                       tile_bounds.right, tile_bounds.top)
+
+tile_gdf = gpd.GeoDataFrame(geometry=[tile_polygon], crs="EPSG:32635")
+
+# Calculate what percentage of each MPA falls within the tile
+mpas["mpa_area"] = mpas.geometry.area
+mpas["intersection_area"] = mpas.geometry.intersection(tile_polygon).area
+mpas["coverage_pct"] = (mpas["intersection_area"] / mpas["mpa_area"]) * 100
+
+# Retain only MPAs with at least 60% of their area within the tile
+mpas_filtered = mpas[mpas["coverage_pct"] >= 60].copy()
+
+print(f"MPAs within tile at 60% coverage threshold: {len(mpas_filtered)} of {len(mpas)}")
+print("\nRetained MPAs:")
+for _, row in mpas_filtered.iterrows():
+    print(f"  {row['Name']} ({row['MPA_status']}) - {row['coverage_pct']:.1f}% coverage")
+
 # --- Tile-wide summary statistics ---
 
 print("\nTile-wide NDCI statistics:")
@@ -74,7 +98,7 @@ raster_paths = {name: OUTPUT_DIR / f"{name}_ndci.tif" for name in SCENES}
 
 zonal_rows = []
 
-for idx, mpa_row in mpas.iterrows():
+for idx, mpa_row in mpas_filtered.iterrows():
     geom = [mapping(mpa_row.geometry)]
     mpa_name = mpa_row["Name"]
     mpa_status = mpa_row["MPA_status"]
