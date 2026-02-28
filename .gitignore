@@ -4,3 +4,5 @@ outputs/maps/*.png
 outputs/maps/*.pdf
 outputs/statistics/*.csv
 *.tif
+
+.env
