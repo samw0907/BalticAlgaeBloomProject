@@ -53,10 +53,15 @@ mpas["mpa_area"] = mpas.geometry.area
 mpas["intersection_area"] = mpas.geometry.intersection(tile_polygon).area
 mpas["coverage_pct"] = (mpas["intersection_area"] / mpas["mpa_area"]) * 100
 
-# Retain only MPAs with at least 60% of their area within the tile
-mpas_filtered = mpas[mpas["coverage_pct"] >= 60].copy()
+print("\nAll MPAs with any tile overlap:")
+overlapping = mpas[mpas["intersection_area"] > 0].copy()
+for _, row in overlapping.iterrows():
+    print(f"  {row['Name']} - {row['coverage_pct']:.1f}%")
 
-print(f"MPAs within tile at 60% coverage threshold: {len(mpas_filtered)} of {len(mpas)}")
+# Retain only MPAs with at least 60% of their area within the tile
+mpas_filtered = mpas[mpas["coverage_pct"] >= 20].copy()
+
+print(f"MPAs within tile at 20% coverage threshold: {len(mpas_filtered)} of {len(mpas)}")
 print("\nRetained MPAs:")
 for _, row in mpas_filtered.iterrows():
     print(f"  {row['Name']} ({row['MPA_status']}) - {row['coverage_pct']:.1f}% coverage")
