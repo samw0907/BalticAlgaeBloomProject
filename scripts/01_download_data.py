@@ -74,3 +74,63 @@ for start, end, label in date_ranges:
     print(f"  {label}: {len(products)} scene(s) found")
     for p in products:
         print(f"    {p['Name']}")
+
+# --- Select and download target scenes ---
+
+# These are the specific scenes validated and used in this project
+TARGET_SCENES = [
+    "S2B_MSIL2A_20240605T094549_N0510_R079_T35VLG_20240605T112203.SAFE",
+    "S2A_MSIL2A_20240710T095031_N0510_R079_T35VLG_20240710T154753.SAFE",
+    "S2A_MSIL2A_20240829T095031_N0511_R079_T35VLG_20240829T134149.SAFE",
+]
+
+# Set to False to actually download - data is ~900MB per scene
+DRY_RUN = True
+
+print("\nSearching catalogue for target scenes...")
+
+download_session = requests.Session()
+download_session.headers.update(headers)
+
+for scene_name in TARGET_SCENES:
+    # Query by exact name
+    params = {
+        "$filter": f"Name eq '{scene_name}'",
+        "$top": 1,
+    }
+    response = requests.get(base_url, params=params, headers=headers)
+    products = response.json().get("value", [])
+
+    if not products:
+        print(f"  Not found in catalogue: {scene_name}")
+        continue
+
+    product = products[0]
+    product_id = product["Id"]
+    output_path = RAW_DATA / f"{scene_name}.zip"
+
+    if output_path.exists():
+        print(f"  Already exists, skipping: {scene_name}")
+        continue
+
+    if DRY_RUN:
+        print(f"  DRY RUN - would download: {scene_name} (ID: {product_id})")
+        continue
+
+    print(f"  Downloading: {scene_name}")
+    download_url = f"https://download.dataspace.copernicus.eu/odata/v1/Products({product_id})/$value"
+
+    with download_session.get(download_url, stream=True) as r:
+        r.raise_for_status()
+        total = int(r.headers.get("content-length", 0))
+        downloaded = 0
+        with open(output_path, "wb") as f:
+            for chunk in r.iter_content(chunk_size=8192):
+                f.write(chunk)
+                downloaded += len(chunk)
+                if total:
+                    pct = downloaded / total * 100
+                    print(f"\r    {pct:.1f}%", end="", flush=True)
+        print(f"\r    Done - saved to {output_path}")
+
+print("\nDownload script complete.")
