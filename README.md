@@ -46,24 +46,41 @@ Scripts are numbered in recommended run order:
 
 ## Results
 
-Tile-wide mean NDCI values show a clear temporal pattern:
+### Tile-wide statistics
 
-| Date | Mean NDCI | Interpretation |
-|---|---|---|
-| 5 June 2024 | -0.00589 | Pre-bloom baseline, low chlorophyll |
-| 10 July 2024 | -0.00072 | Peak bloom, elevated chlorophyll |
-| 29 August 2024 | -0.00425 | Post-peak decline |
+| Date | Mean NDCI | P95 NDCI | Max NDCI |
+|---|---|---|---|
+| 5 June 2024 | -0.00589 | 0.00141 | 1.00000* |
+| 10 July 2024 | -0.00072 | 0.00987 | 1.00000* |
+| 29 August 2024 | -0.00425 | 0.00365 | 0.32437 |
 
-Three HELCOM MPAs fall substantially within the tile extent and were retained for zonal analysis: Kirkkonummi Archipelago (100% within tile), Tammisaari and Hanko Archipelago (45%), and Hangon itäinen selkä (23%). MPAs were included where at least 20% of their total area fell within the tile boundary. A higher total area % would be preffered, however higher cloud coverage over the areas on July 10, required a lower threshold to be used. Zonal mean NDCI values for these areas follow the same temporal pattern as the tile-wide figures:
+*Tile-wide max values of 1.0 for June and July are noise pixels at mask boundaries and are not representative of bloom intensity. The August max of 0.32 is more representative. P95 is used as the primary peak intensity metric.
 
-| Date | Mean NDCI across retained MPAs |
-|---|---|
-| 5 June 2024 | -0.00656 |
-| 10 July 2024 | 0.00013 |
-| 29 August 2024 | -0.00315 |
+### HELCOM MPA zonal statistics
 
-Söderskärin ja Långörenin saaristo (1.4%) and Pakri (2.4%) fell below the 20% threshold and were excluded from the MPA analysis.
----
+Three MPAs fall substantially within the tile extent and were retained for zonal analysis using a 20% minimum area coverage threshold: Kirkkonummi Archipelago (100%), Tammisaari and Hanko Archipelago (45%), and Hangon itäinen selkä (23%). Söderskärin ja Långörenin saaristo (1.4%) and Pakri (2.4%) fell below the threshold and were excluded.
+
+| MPA | Date | Mean NDCI | P95 NDCI | Max NDCI |
+|---|---|---|---|---|
+| Kirkkonummi Archipelago | 5 June 2024 | -0.00742 | 0.00094 | 0.22521 |
+| Kirkkonummi Archipelago | 10 July 2024 | 0.00203 | 0.01489 | 0.24167 |
+| Kirkkonummi Archipelago | 29 August 2024 | -0.00402 | 0.00503 | 0.23852 |
+| Tammisaari and Hanko Archipelago | 5 June 2024 | -0.00611 | 0.02250 | 0.22315 |
+| Tammisaari and Hanko Archipelago | 10 July 2024 | 0.00002 | 0.02698 | 0.26975 |
+| Tammisaari and Hanko Archipelago | 29 August 2024 | -0.00039 | 0.02491 | 0.22261 |
+| Hangon itäinen selkä | 5 June 2024 | -0.00616 | 0.00000 | 0.03100 |
+| Hangon itäinen selkä | 10 July 2024 | -0.00166 | 0.00621 | 0.16610 |
+| Hangon itäinen selkä | 29 August 2024 | -0.00503 | 0.00139 | 0.04478 |
+
+All three MPAs follow the same June baseline → July peak → August decline temporal pattern as the tile-wide figures. Tammisaari and Hanko Archipelago consistently shows the highest P95 values, indicating more intense localised bloom conditions. Hangon itäinen selkä shows notably lower values across all metrics, consistent with its smaller size and more open water exposure. The June P95 of 0.000 for Hangon itäinen selkä reflects near-zero chlorophyll activity across 95% of valid pixels in pre-bloom conditions.
+
+### Averaged across retained MPAs by date
+
+| Date | Mean NDCI | P95 NDCI | Max NDCI |
+|---|---|---|---|
+| 5 June 2024 | -0.00656 | 0.00781 | 0.15979 |
+| 10 July 2024 | 0.00013 | 0.01602 | 0.22584 |
+| 29 August 2024 | -0.00315 | 0.01044 | 0.16864 |
 
 ## Installation
 
