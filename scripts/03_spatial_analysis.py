@@ -131,7 +131,7 @@ for idx, mpa_row in mpas_filtered.iterrows():
                 "valid_pixels": len(valid),
                 "mean_ndci": round(float(np.mean(valid)), 5),
                 "max_ndci": round(float(np.max(valid)), 5),
-                "p95_ndci": round(float(np.percentile(valid, 95)), 5),
+                "p95_ndci": round(float(np.percentile(valid, 95)), 6),
                 "std_ndci": round(float(np.std(valid)), 5),
             })
 
@@ -147,9 +147,17 @@ if not zonal_df.empty:
     print(f"Saved: {STATS_DIR / 'mpa_zonal_statistics.csv'}")
 
     # Print summary by date
-    print("\nMean NDCI across all valid MPAs by date:")
-    summary = zonal_df.groupby("date")["mean_ndci"].mean()
-    for date, val in summary.items():
-        print(f"  {date}: {val:.5f}")
+    # Print per-MPA statistics
+    print("\nPer-MPA statistics:")
+    for _, row in zonal_df.iterrows():
+        print(f"  {row['mpa_name'][:40]:<40} {row['date']}  mean: {row['mean_ndci']:>8.5f}  max: {row['max_ndci']:>8.5f}  p95: {row['p95_ndci']:>8.6f}")
+
+    # Print summary averages across all retained MPAs by date
+    print("\nAveraged across all retained MPAs by date:")
+    for metric, label in [("mean_ndci", "Mean"), ("max_ndci", "Max"), ("p95_ndci", "P95")]:
+        print(f"  {label}:")
+        summary = zonal_df.groupby("date")[metric].mean()
+        for date, val in summary.items():
+            print(f"    {date}: {val:.6f}")
 else:
     print("No valid MPA pixels found within tile extent.")
