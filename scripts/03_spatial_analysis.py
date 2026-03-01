@@ -69,7 +69,7 @@ for _, row in mpas_filtered.iterrows():
 # --- Tile-wide summary statistics ---
 
 print("\nTile-wide NDCI statistics:")
-print(f"{'Date':<12} {'Valid pixels':>15} {'Mean NDCI':>12} {'Max NDCI':>12} {'Std dev':>10}")
+print(f"{'Date':<12} {'Valid pixels':>15} {'Mean NDCI':>12} {'Max NDCI':>12} {'P95 NDCI':>12} {'Std dev':>10}")
 print("-" * 65)
 
 tile_stats = []
@@ -85,10 +85,11 @@ for name, date in SCENES.items():
         "valid_pixels": len(valid),
         "mean_ndci": round(float(np.mean(valid)), 5),
         "max_ndci": round(float(np.max(valid)), 5),
+        "p95_ndci": round(float(np.percentile(valid, 95)), 5),
         "std_ndci": round(float(np.std(valid)), 5),
     }
     tile_stats.append(stats)
-    print(f"{date:<12} {stats['valid_pixels']:>15,} {stats['mean_ndci']:>12.5f} {stats['max_ndci']:>12.5f} {stats['std_ndci']:>10.5f}")
+    print(f"{date:<12} {stats['valid_pixels']:>15,} {stats['mean_ndci']:>12.5f} {stats['max_ndci']:>12.5f} {stats['p95_ndci']:>12.5f} {stats['std_ndci']:>10.5f}")
 
 tile_df = pd.DataFrame(tile_stats)
 tile_df.to_csv(STATS_DIR / "tile_wide_statistics.csv", index=False)
@@ -130,6 +131,7 @@ for idx, mpa_row in mpas_filtered.iterrows():
                 "valid_pixels": len(valid),
                 "mean_ndci": round(float(np.mean(valid)), 5),
                 "max_ndci": round(float(np.max(valid)), 5),
+                "p95_ndci": round(float(np.percentile(valid, 95)), 5),
                 "std_ndci": round(float(np.std(valid)), 5),
             })
 
