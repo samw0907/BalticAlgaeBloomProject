@@ -54,10 +54,15 @@ Tile-wide mean NDCI values show a clear temporal pattern:
 | 10 July 2024 | -0.00072 | Peak bloom, elevated chlorophyll |
 | 29 August 2024 | -0.00425 | Post-peak decline |
 
-Three HELCOM MPAs fall substantially within the tile extent: Kirkkonummi Archipelago, Tammisaari and Hanko Archipelago, and Hangon itäinen selkä. Zonal statistics for these areas follow the same temporal trend as the tile-wide figures.
+Three HELCOM MPAs fall substantially within the tile extent and were retained for zonal analysis: Kirkkonummi Archipelago (100% within tile), Tammisaari and Hanko Archipelago (45%), and Hangon itäinen selkä (23%). MPAs were included where at least 20% of their total area fell within the tile boundary. A higher total area % would be preffered, however higher cloud coverage over the areas on July 10, required a lower threshold to be used. Zonal mean NDCI values for these areas follow the same temporal pattern as the tile-wide figures:
 
-Söderskärin ja Långörenin saaristo and Pakri MPAs only marginally entered the study area. As such, these MPAs were removed from the calculation of average NDCI within the MPAs.
+| Date | Mean NDCI across retained MPAs |
+|---|---|
+| 5 June 2024 | -0.00656 |
+| 10 July 2024 | 0.00013 |
+| 29 August 2024 | -0.00315 |
 
+Söderskärin ja Långörenin saaristo (1.4%) and Pakri (2.4%) fell below the 20% threshold and were excluded from the MPA analysis.
 ---
 
 ## Installation
